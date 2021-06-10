@@ -7,11 +7,13 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.fragment.app.Fragment
+import com.example.geoguesser.utils.Preferences
 import com.github.appintro.AppIntro
 import com.github.appintro.AppIntroFragment
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.annotations.AfterPermissionGranted
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
+import org.koin.android.ext.android.inject
 import java.util.jar.Manifest
 
 class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
@@ -19,6 +21,8 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
     companion object{
         const val FINE_LOCATION_REQUEST_CODE = 1
     }
+
+    private val preferences: Preferences by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +63,7 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
     }
 
     private fun startMapsActivity() {
+        preferences.saveSetup(true)
         val intent = Intent(this, MapsActivity::class.java)
         startActivity(intent)
     }
