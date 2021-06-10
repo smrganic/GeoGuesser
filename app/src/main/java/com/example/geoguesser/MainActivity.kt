@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
         val intent: Intent
         if(preferences.isSetupComplete()) {
-            intent = Intent(this, MapsActivity::class.java)
+            intent = Intent(this, StartGameActivity::class.java)
             startActivity(intent)
         }else{
             intent = Intent(this, GeoAppIntro::class.java)

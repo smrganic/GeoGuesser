@@ -1,21 +1,26 @@
 package com.example.geoguesser.ui
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.geoguesser.R
+import com.example.geoguesser.databinding.ActivityMapsBinding
+import com.example.geoguesser.databinding.ActivityStartGameBinding
 import com.google.android.gms.maps.SupportStreetViewPanoramaFragment
 import com.google.android.gms.maps.model.LatLng
 
 class StartGameActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityStartGameBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_start_game)
+        binding = ActivityStartGameBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.fab.setOnClickListener{
+            intent = Intent(this, MapsActivity::class.java)
+            startActivity(intent)
+        }
+    }
 
-        val streetView = supportFragmentManager.findFragmentById(R.id.streetView) as SupportStreetViewPanoramaFragment?
-        streetView?.getStreetViewPanoramaAsync { panorama -> savedInstanceState ?: panorama.setPosition(SYDNEY) }
-    }
-    companion object {
-        // George St, Sydney
-        private val SYDNEY = LatLng(-33.87365, 151.20689)
-    }
 }

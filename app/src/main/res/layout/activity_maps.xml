@@ -15,14 +15,13 @@
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab"
-        android:text="Guess"
-        android:textAlignment="center"
-        map:icon="@drawable/ic_baseline_pin_drop_128"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        map:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="Guess"
+        android:textAlignment="center"
+        map:icon="@drawable/ic_baseline_map_128"
         map:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-   />
+        map:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
