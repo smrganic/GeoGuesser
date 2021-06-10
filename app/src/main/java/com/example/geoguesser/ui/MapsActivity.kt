@@ -1,9 +1,10 @@
-package com.example.geoguesser
+package com.example.geoguesser.ui
 
 import android.Manifest
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.geoguesser.R
 import com.example.geoguesser.databinding.ActivityMapsBinding
 
 import com.google.android.gms.maps.CameraUpdateFactory

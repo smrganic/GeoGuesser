@@ -1,4 +1,4 @@
-package com.example.geoguesser
+package com.example.geoguesser.ui
 
 import android.content.Intent
 import android.graphics.Color
@@ -7,14 +7,13 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.fragment.app.Fragment
+import com.example.geoguesser.R
 import com.example.geoguesser.utils.Preferences
 import com.github.appintro.AppIntro
 import com.github.appintro.AppIntroFragment
 import com.vmadalin.easypermissions.EasyPermissions
-import com.vmadalin.easypermissions.annotations.AfterPermissionGranted
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import org.koin.android.ext.android.inject
-import java.util.jar.Manifest
 
 class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
 
@@ -26,14 +25,7 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        supportActionBar?.hide()
-
-        window.insetsController?.apply {
-            hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-            systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        }
-
+        setImmersiveMode()
         setup()
     }
 
