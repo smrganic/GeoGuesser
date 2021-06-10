@@ -1,5 +1,7 @@
 package com.example.geoguesser
 
+import android.Manifest
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.geoguesser.databinding.ActivityMapsBinding
@@ -10,6 +12,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.vmadalin.easypermissions.EasyPermissions
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -24,6 +27,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment =  supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        binding.fab.setOnClickListener {
+            if(EasyPermissions.hasPermissions(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                val intent = Intent(this, GeoAppIntro::class.java)
+                startActivity(intent)
+            }else{
+                EasyPermissions.requestPermissions(this, "Location is needed", 1, android.Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
     }
 
     /**
