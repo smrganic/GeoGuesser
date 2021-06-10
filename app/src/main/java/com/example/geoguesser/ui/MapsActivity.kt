@@ -1,7 +1,11 @@
-package com.example.geoguesser
+package com.example.geoguesser.ui
 
+import android.Manifest
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.geoguesser.R
+import com.example.geoguesser.databinding.ActivityMapsBinding
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -9,18 +13,30 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.vmadalin.easypermissions.EasyPermissions
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    private lateinit var binding: ActivityMapsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
+        binding = ActivityMapsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
+        val mapFragment =  supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        binding.fab.setOnClickListener {
+            if(EasyPermissions.hasPermissions(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                val intent = Intent(this, GeoAppIntro::class.java)
+                startActivity(intent)
+            }else{
+                EasyPermissions.requestPermissions(this, "Location is needed", 1, android.Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
     }
 
     /**
