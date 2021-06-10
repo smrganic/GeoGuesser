@@ -6,6 +6,8 @@ import android.os.Bundle
 import com.example.geoguesser.R
 import com.example.geoguesser.databinding.ActivityMapsBinding
 import com.example.geoguesser.databinding.ActivityStartGameBinding
+import com.example.geoguesser.utils.CallBackListener
+import com.example.geoguesser.utils.LatLngGenerator
 import com.google.android.gms.maps.SupportStreetViewPanoramaFragment
 import com.google.android.gms.maps.model.LatLng
 

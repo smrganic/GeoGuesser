@@ -67,4 +67,7 @@ dependencies {
     implementation 'com.vmadalin:easypermissions-ktx:1.0.0'
     implementation "io.insert-koin:koin-android:$koin_version"
     implementation "androidx.fragment:fragment-ktx:$fragment_version"
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation 'com.beust:klaxon:5.5'
+
 }
