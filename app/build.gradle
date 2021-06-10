@@ -8,9 +8,17 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 def googleMapApiKey = properties.getProperty('MAPS_API_KEY')
 
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
+
+    buildFeatures {
+        viewBinding true
+    }
 
     defaultConfig {
         manifestPlaceholders = [MAPS_API_KEY:"${googleMapApiKey}"]
@@ -38,6 +46,10 @@ android {
     }
 }
 
+ext {
+    koin_version= "3.0.2"
+}
+
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -49,4 +61,8 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation 'com.github.AppIntro:AppIntro:6.1.0'
+    implementation 'com.vmadalin:easypermissions-ktx:1.0.0'
+    implementation "io.insert-koin:koin-android:$koin_version"
 }
