@@ -6,6 +6,7 @@ import android.os.Bundle
 import com.example.geoguesser.ui.GeoAppIntro
 import com.example.geoguesser.ui.MapsActivity
 import com.example.geoguesser.ui.StartGameActivity
+import com.example.geoguesser.ui.tester
 import com.example.geoguesser.utils.Preferences
 import org.koin.android.ext.android.inject
 
@@ -16,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
         val intent: Intent
         if(preferences.isSetupComplete()) {
-            intent = Intent(this, StartGameActivity::class.java)
+            intent = Intent(this, MapsActivity::class.java)
             startActivity(intent)
         }else{
             intent = Intent(this, GeoAppIntro::class.java)
