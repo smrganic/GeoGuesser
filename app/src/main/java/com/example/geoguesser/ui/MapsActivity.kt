@@ -10,6 +10,7 @@ import com.example.geoguesser.R
 import com.example.geoguesser.databinding.ActivityMapsBinding
 import com.example.geoguesser.network.Networking
 import com.example.geoguesser.network.Parser
+import com.example.geoguesser.sounds.AudioPlayer
 import com.example.geoguesser.utils.Preferences
 import com.example.geoguesser.utils.addInfoWindow
 import com.google.android.gms.maps.*
@@ -27,9 +28,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     private lateinit var binding: ActivityMapsBinding
 
-    private val networking by inject<Networking>()
+    private val networking: Networking by inject()
     private val parser by inject<Parser<String, LatLng>>()
     private val preferences: Preferences by inject()
+    private val soundPoolPlayer: AudioPlayer by inject()
 
     private lateinit var position: LatLng
     private var streetViewIsVisible = true
@@ -67,6 +69,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
         }
 
         if (marker != null) {
+
+            soundPoolPlayer.playSound(R.raw.marker)
 
             drawPolyLine(marker!!.position, position)
 
