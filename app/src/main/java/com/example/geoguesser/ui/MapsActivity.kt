@@ -11,6 +11,8 @@ import com.example.geoguesser.R
 import com.example.geoguesser.databinding.ActivityMapsBinding
 import com.example.geoguesser.network.Networking
 import com.example.geoguesser.network.Parser
+import com.example.geoguesser.utils.Preferences
+import com.example.geoguesser.utils.addInfoWindow
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 
@@ -28,6 +30,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     private val networking by inject<Networking>()
     private val parser by inject<Parser<String, LatLng>>()
+    private val preferences: Preferences by inject()
 
     private lateinit var position: LatLng
     private var streetViewIsVisible = true
@@ -72,14 +75,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
             binding.apply {
                 fab.setIconResource(R.drawable.ic_baseline_explore_24)
-                fab.text = "Play Again"
+                fab.text = getString(R.string.playAgain)
                 resetGame = true
             }
-            val bundle = Bundle()
-
-            /*val intent = Intent(this, StartGameActivity::class.java)
-            bundle.putFloat("HIGH_SCORE", calculateResult(marker.position, position))
-            startActivity(intent, bundle)*/
 
         } else {
             if (streetViewIsVisible) {
@@ -95,23 +93,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     }
 
-    private fun calculateResult(position: LatLng, position1: LatLng): Float {
-        TODO("Create high score")
-    }
-
-    fun Polyline.addInfoWindow(map: GoogleMap, title: String, message: String, infoLatLng: LatLng) {
-        val invisibleMarker =
-            BitmapDescriptorFactory.fromBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
-        val marker = map.addMarker(
-            MarkerOptions()
-                .position(infoLatLng)
-                .title(title)
-                .snippet(message)
-                .alpha(0f)
-                .icon(invisibleMarker)
-                .anchor(0f, 0f)
+    private fun calculateResult(selectedPosition: LatLng, actualPosition: LatLng): String {
+        val results = FloatArray(3)
+        Location.distanceBetween(
+            selectedPosition.latitude,
+            selectedPosition.longitude,
+            actualPosition.latitude,
+            actualPosition.longitude,
+            results
         )
-        marker.showInfoWindow()
+
+        val formattedResult = String.format("%.2f", results[0] / 1000)
+
+        if(preferences.getHighScore() > results[0]) preferences.setHighScore(results[0])
+
+        return formattedResult
     }
 
     private fun drawPolyLine(selectedPosition: LatLng, actualPosition: LatLng) {
@@ -127,23 +123,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
         )
 
+        val result = calculateResult(selectedPosition, actualPosition)
+
         val xValue = (selectedPosition.latitude + actualPosition.latitude) / 2
         val yValue = (selectedPosition.longitude + actualPosition.longitude) / 2
-
         val infoWindowPosition = LatLng(xValue, yValue)
 
-        val results = FloatArray(3)
-        Location.distanceBetween(
-            selectedPosition.latitude,
-            selectedPosition.longitude,
-            actualPosition.latitude,
-            actualPosition.longitude,
-            results
-        )
-
-        val formatedResult = String.format("%.2f", results[0] / 1000)
-
-        poly.addInfoWindow(mMap, "Distance", "You guessed $formatedResult km from the correct location.", infoWindowPosition)
+        poly.addInfoWindow(mMap, "Distance", "You guessed $result km from the correct location.", infoWindowPosition)
 
         val latLngBoundsBuilder = LatLngBounds.builder()
         latLngBoundsBuilder.include(selectedPosition)
@@ -224,7 +210,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
     }
 
     override fun onMapLongClick(clickPosition: LatLng) {
-        
+
         if(resetGame) return
 
         mMap.run {

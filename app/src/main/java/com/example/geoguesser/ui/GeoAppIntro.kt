@@ -34,7 +34,7 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
             AppIntroFragment.newInstance(
                 title = getString(R.string.introTitle1),
                 description = getString(R.string.descCard1),
-                backgroundColor = Color.DKGRAY,
+                backgroundColor = Color.parseColor("#1D3557"),
                 imageDrawable = R.drawable.ic_baseline_explore_24
             )
         )
@@ -42,7 +42,7 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
             AppIntroFragment.newInstance(
                 title = getString(R.string.introTitle2),
                 description = getString(R.string.descCard2),
-                backgroundColor = Color.DKGRAY,
+                backgroundColor = Color.parseColor("#1D3557"),
                 imageDrawable = R.drawable.ic_baseline_map_128
             )
         )
@@ -50,7 +50,7 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
             AppIntroFragment.newInstance(
                 title = getString(R.string.introTitle3),
                 description = getString(R.string.descCard3),
-                backgroundColor = Color.DKGRAY,
+                backgroundColor = Color.parseColor("#1D3557"),
                 imageDrawable = R.drawable.ic_baseline_pin_drop_128
             )
         )
