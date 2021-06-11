@@ -1,7 +1,9 @@
 package com.example.geoguesser.ui
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -33,7 +35,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
     private lateinit var streetView: SupportStreetViewPanoramaFragment
     private lateinit var mapFragment: SupportMapFragment
     private lateinit var mMap: GoogleMap
-    private lateinit var marker: Marker
+    private var marker: Marker? = null
+    private var resetGame = false
 
     companion object {
         const val STREET_VIEW_TAG = "streetViewTag"
@@ -53,15 +56,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     private fun onFabClick() {
 
-        if (this::marker.isInitialized) {
+        if(resetGame){
+            setStreetView()
+            return
+        }
 
-            drawPolyLine(marker.position, position)
+        if (marker != null) {
+
+            drawPolyLine(marker!!.position, position)
+
+            // save high score
+
+            binding.apply {
+                fab.setIconResource(R.drawable.ic_baseline_explore_24)
+                fab.text = "Play Again"
+                resetGame = true
+                marker = null
+            }
 
             val bundle = Bundle()
 
-            val intent = Intent(this, StartGameActivity::class.java)
+            /*val intent = Intent(this, StartGameActivity::class.java)
             bundle.putFloat("HIGH_SCORE", calculateResult(marker.position, position))
-            startActivity(intent, bundle)
+            startActivity(intent, bundle)*/
 
         } else {
             if (streetViewIsVisible) {
@@ -81,6 +98,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
         TODO("Create high score")
     }
 
+    fun Polyline.addInfoWindow(map: GoogleMap, title: String, message: String, infoLatLng: LatLng) {
+        val invisibleMarker =
+            BitmapDescriptorFactory.fromBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
+        val marker = map.addMarker(
+            MarkerOptions()
+                .position(infoLatLng)
+                .title(title)
+                .snippet(message)
+                .alpha(0f)
+                .icon(invisibleMarker)
+                .anchor(0f, 0f)
+        )
+        marker.showInfoWindow()
+    }
+
     private fun drawPolyLine(selectedPosition: LatLng, actualPosition: LatLng) {
         val poly = mMap.addPolyline(
             PolylineOptions().clickable(false).add(selectedPosition).add(actualPosition)
@@ -93,6 +125,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
             MarkerOptions().position(actualPosition).title("Street view Location")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
         )
+
+        val xValue = (selectedPosition.latitude + actualPosition.latitude) / 2
+        val yValue = (selectedPosition.longitude + actualPosition.longitude) / 2
+
+        val infoWindowPosition = LatLng(xValue, yValue)
+
+        val results = FloatArray(3)
+        Location.distanceBetween(
+            selectedPosition.latitude,
+            selectedPosition.longitude,
+            actualPosition.latitude,
+            actualPosition.longitude,
+            results
+        )
+
+        poly.addInfoWindow(mMap, "Distance", "You guessed ${results[0] / 1000} km from the correct location.", infoWindowPosition)
 
         val latLngBoundsBuilder = LatLngBounds.builder()
         latLngBoundsBuilder.include(selectedPosition)
@@ -141,6 +189,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
     }
 
     private fun setStreetView() {
+
+        resetGame = false
+        streetViewIsVisible = true
+
+        binding.apply {
+            fab.setIconResource(R.drawable.ic_baseline_map_128)
+            fab.text = getString(R.string.streetViewButtonText)
+        }
+
 
         if (!this::streetView.isInitialized) {
 
