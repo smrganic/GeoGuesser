@@ -1,11 +1,10 @@
 package com.example.geoguesser.ui
 
-import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.widget.Toast
 import com.example.geoguesser.R
 import com.example.geoguesser.databinding.ActivityMapsBinding
@@ -143,6 +142,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
         if (!this::mapFragment.isInitialized) {
             mapFragment = SupportMapFragment.newInstance()
+            val inflater = TransitionInflater.from(this)
+            mapFragment.enterTransition = inflater.inflateTransition(R.transition.fade)
+            mapFragment.exitTransition = inflater.inflateTransition(R.transition.slide_right)
         }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -188,6 +190,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
         if (!this::streetView.isInitialized) {
 
             streetView = SupportStreetViewPanoramaFragment.newInstance()
+
+            val inflater = TransitionInflater.from(this)
+            streetView.enterTransition = inflater.inflateTransition(R.transition.fade)
+            streetView.exitTransition = inflater.inflateTransition(R.transition.slide_left)
 
             supportFragmentManager.beginTransaction().setReorderingAllowed(true)
                 .add(R.id.fragmentContainer, streetView, STREET_VIEW_TAG).commit()
