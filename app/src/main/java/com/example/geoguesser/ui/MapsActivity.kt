@@ -1,18 +1,24 @@
 package com.example.geoguesser.ui
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.example.geoguesser.R
 import com.example.geoguesser.databinding.ActivityMapsBinding
 import com.example.geoguesser.network.Networker
 import com.example.geoguesser.network.Parser
 import com.example.geoguesser.network.RandomCoordinatesParser
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.*
 
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
@@ -28,12 +34,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
     private val networker by inject<Networker>()
     private val parser by inject<Parser<String, LatLng>>()
 
-    private var position: LatLng? = null
+    private lateinit var position: LatLng
     private var streetViewIsVisible = true
 
     private var streetView: SupportStreetViewPanoramaFragment? = null
     private var mapFragment: SupportMapFragment? = null
     private lateinit var mMap: GoogleMap
+    private var marker: Marker? = null
 
     companion object {
         const val STREET_VIEW_TAG = "streetViewTag"
@@ -45,27 +52,57 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.fab.setOnClickListener { onFabClick(savedInstanceState) }
+        binding.fab.setOnClickListener { onFabClick() }
 
-        setStreetView(savedInstanceState)
+        setStreetView()
 
     }
 
-    private fun onFabClick(savedInstanceState: Bundle?) {
+    private fun onFabClick() {
+
+        marker?.let {
+            val results = FloatArray(3)
+            Location.distanceBetween(
+                it.position.latitude,
+                it.position.longitude,
+                position.latitude,
+                position.longitude,
+                results
+            )
+
+            val bundle = Bundle()
+            val poly = mMap.addPolyline(PolylineOptions().clickable(false).add(it.position).add(position))
+            poly.width = 12f
+            poly.color = Color.DKGRAY
+            poly.pattern = listOf(Dot(), Gap(20f))
+
+            mMap.addMarker(
+                MarkerOptions().position(position).title("Street view Location")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+            )
+
+            val latLngBoundsBuilder = LatLngBounds.builder()
+            latLngBoundsBuilder.include(it.position)
+            latLngBoundsBuilder.include(position)
+            val bounds = latLngBoundsBuilder.build()
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200))
+            /*val intent = Intent(this, StartGameActivity::class.java)
+            bundle.putFloat("HIGH_SCORE", results[0])
+            startActivity(intent, bundle)*/
+        }
+
         if (streetViewIsVisible) {
-            setMapView(savedInstanceState)
+            setMapView()
             binding.fab.setIconResource(R.drawable.ic_baseline_pin_drop_128)
             binding.fab.text = "Confirm"
             streetViewIsVisible = false
         } else {
-            setStreetView(savedInstanceState)
-            binding.fab.setIconResource(R.drawable.ic_baseline_map_128)
-            binding.fab.text = "Guess"
-            streetViewIsVisible = true
+            Toast.makeText(this, "Place a marker by long pressing the map", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun setMapView(savedInstanceState: Bundle?) {
+    private fun setMapView() {
         if (mapFragment == null) {
             mapFragment = SupportMapFragment.newInstance()
         }
@@ -86,8 +123,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
                     string = response.body?.string()
 
-                    string?.let { position = parser.parse(it)
-                        runOnUiThread { panorama.setPosition(position!!, 2500) }
+                    string?.let {
+                        position = parser.parse(it)
+                        runOnUiThread { panorama.setPosition(position, 2500) }
                         Log.d("MAPSLATITUDE", position.toString())
                     }
                 }
@@ -96,7 +134,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
         networker.execute(callback, "https://api.3geonames.org/?randomland=HR&json=1")
     }
 
-    private fun setStreetView(savedInstanceState: Bundle?) {
+    private fun setStreetView() {
 
         if (streetView == null) {
             streetView = SupportStreetViewPanoramaFragment.newInstance()
@@ -119,11 +157,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     override fun onMapLongClick(clickPosition: LatLng) {
         mMap.clear()
-        mMap.addMarker(
-            MarkerOptions().position(clickPosition).title("Location Selected")
+        marker = mMap.addMarker(
+            MarkerOptions().position(clickPosition).title("Selected Location")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
         )
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(clickPosition, 20f))
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(clickPosition, 5f))
     }
 
     override fun onStreetViewPanoramaReady(panorama: StreetViewPanorama) {

@@ -12,11 +12,8 @@ class RandomCoordinatesParser() : Parser<String, LatLng> {
         val longitude = inputValue.substringAfter("\"longt\" : \"").substringBefore("\"")
             .toDoubleOrNull()
 
-        position = if (latitude != null && longitude != null) {
-            LatLng(latitude, longitude)
-        } else {
-            LatLng(45.5550, 18.6955)
-        }
+        position = if (latitude != null && longitude != null) LatLng(latitude, longitude)
+        else LatLng(45.5550, 18.6955)
 
         return position
     }

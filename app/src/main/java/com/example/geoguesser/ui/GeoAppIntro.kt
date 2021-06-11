@@ -3,9 +3,6 @@ package com.example.geoguesser.ui
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.view.View
-import android.view.WindowInsets
-import android.view.WindowInsetsController
 import androidx.fragment.app.Fragment
 import com.example.geoguesser.R
 import com.example.geoguesser.utils.Preferences
@@ -54,9 +51,9 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
         ))
     }
 
-    private fun startMapsActivity() {
+    private fun startGameActivity() {
         preferences.saveSetup(true)
-        val intent = Intent(this, MapsActivity::class.java)
+        val intent = Intent(this, StartGameActivity::class.java)
         startActivity(intent)
     }
 
@@ -64,7 +61,7 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
         super.onSkipPressed(currentFragment)
         // Decide what to do when the user clicks on "Skip"
         if(EasyPermissions.hasPermissions(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-            startMapsActivity()
+            startGameActivity()
         }
         else{
             EasyPermissions.requestPermissions(this, getString(R.string.locationRationale), FINE_LOCATION_REQUEST_CODE, android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -75,7 +72,7 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
         super.onDonePressed(currentFragment)
         // Decide what to do when the user clicks on "Done"
         if(EasyPermissions.hasPermissions(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-            startMapsActivity()
+            startGameActivity()
         }
         else{
             EasyPermissions.requestPermissions(this, getString(R.string.locationRationale), FINE_LOCATION_REQUEST_CODE, android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -89,7 +86,7 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
-        startMapsActivity()
+        startGameActivity()
     }
 
     override fun onRequestPermissionsResult(
