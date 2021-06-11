@@ -14,7 +14,7 @@ import org.koin.android.ext.android.inject
 
 class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
 
-    companion object{
+    companion object {
         const val FINE_LOCATION_REQUEST_CODE = 1
     }
 
@@ -32,23 +32,28 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
         // You can use AppIntroFragment to use a pre-built fragment
         addSlide(
             AppIntroFragment.newInstance(
-                title = "Welcome, Explorer",
-                description = "Set out on a journey that takes you from the smallest town in rural China to the biggest skyscraper in New York City.",
+                title = getString(R.string.introTitle1),
+                description = getString(R.string.descCard1),
                 backgroundColor = Color.DKGRAY,
                 imageDrawable = R.drawable.ic_baseline_explore_24
-            ))
-        addSlide(AppIntroFragment.newInstance(
-            title = "Walk around",
-            description = "Search for flags, shop signs, landmarks or anything else that might help you in the mighty quest for your location.",
-            backgroundColor = Color.DKGRAY,
-            imageDrawable = R.drawable.ic_baseline_map_128
-        ))
-        addSlide(AppIntroFragment.newInstance(
-            title = "Find the right location",
-            description = "Beat your high score by being as accurate as possible.",
-            backgroundColor = Color.DKGRAY,
-            imageDrawable = R.drawable.ic_baseline_pin_drop_128
-        ))
+            )
+        )
+        addSlide(
+            AppIntroFragment.newInstance(
+                title = getString(R.string.introTitle2),
+                description = getString(R.string.descCard2),
+                backgroundColor = Color.DKGRAY,
+                imageDrawable = R.drawable.ic_baseline_map_128
+            )
+        )
+        addSlide(
+            AppIntroFragment.newInstance(
+                title = getString(R.string.introTitle3),
+                description = getString(R.string.descCard3),
+                backgroundColor = Color.DKGRAY,
+                imageDrawable = R.drawable.ic_baseline_pin_drop_128
+            )
+        )
     }
 
     private fun startGameActivity() {
@@ -60,27 +65,43 @@ class GeoAppIntro : AppIntro(), EasyPermissions.PermissionCallbacks {
     override fun onSkipPressed(currentFragment: Fragment?) {
         super.onSkipPressed(currentFragment)
         // Decide what to do when the user clicks on "Skip"
-        if(EasyPermissions.hasPermissions(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (EasyPermissions.hasPermissions(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        ) {
             startGameActivity()
-        }
-        else{
-            EasyPermissions.requestPermissions(this, getString(R.string.locationRationale), FINE_LOCATION_REQUEST_CODE, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                getString(R.string.locationRationale),
+                FINE_LOCATION_REQUEST_CODE,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            )
         }
     }
 
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
         // Decide what to do when the user clicks on "Done"
-        if(EasyPermissions.hasPermissions(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (EasyPermissions.hasPermissions(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        ) {
             startGameActivity()
-        }
-        else{
-            EasyPermissions.requestPermissions(this, getString(R.string.locationRationale), FINE_LOCATION_REQUEST_CODE, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                getString(R.string.locationRationale),
+                FINE_LOCATION_REQUEST_CODE,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            )
         }
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
-        if(EasyPermissions.somePermissionPermanentlyDenied(this, perms)){
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             SettingsDialog.Builder(this).build().show()
         }
     }

@@ -1,6 +1,6 @@
 package com.example.geoguesser.di
 
-import com.example.geoguesser.network.Networker
+import com.example.geoguesser.network.Networking
 import com.example.geoguesser.network.Parser
 import com.example.geoguesser.network.RandomCoordinatesParser
 import com.example.geoguesser.utils.Preferences
@@ -12,6 +12,6 @@ import org.koin.dsl.module
 val prefsModule = module {
     single { Preferences(androidContext()) }
     factory { OkHttpClient() }
-    single { Networker(get()) }
+    single { Networking(get()) }
     single<Parser<String, LatLng>> { RandomCoordinatesParser() }
 }

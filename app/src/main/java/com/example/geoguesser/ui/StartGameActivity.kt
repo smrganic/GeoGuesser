@@ -11,11 +11,15 @@ class StartGameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityStartGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         binding.fab.setOnClickListener{
+
             intent = Intent(this, MapsActivity::class.java)
             startActivity(intent)
+
         }
     }
 
