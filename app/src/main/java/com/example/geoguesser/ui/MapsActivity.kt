@@ -57,6 +57,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
     private fun onFabClick() {
 
         if(resetGame){
+            resetGame = false
+            streetViewIsVisible = true
+            marker = null
             setStreetView()
             return
         }
@@ -71,9 +74,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
                 fab.setIconResource(R.drawable.ic_baseline_explore_24)
                 fab.text = "Play Again"
                 resetGame = true
-                marker = null
             }
-
             val bundle = Bundle()
 
             /*val intent = Intent(this, StartGameActivity::class.java)
@@ -140,7 +141,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
             results
         )
 
-        poly.addInfoWindow(mMap, "Distance", "You guessed ${results[0] / 1000} km from the correct location.", infoWindowPosition)
+        val formatedResult = String.format("%.2f", results[0] / 1000)
+
+        poly.addInfoWindow(mMap, "Distance", "You guessed $formatedResult km from the correct location.", infoWindowPosition)
 
         val latLngBoundsBuilder = LatLngBounds.builder()
         latLngBoundsBuilder.include(selectedPosition)
@@ -190,9 +193,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     private fun setStreetView() {
 
-        resetGame = false
-        streetViewIsVisible = true
-
         binding.apply {
             fab.setIconResource(R.drawable.ic_baseline_map_128)
             fab.text = getString(R.string.streetViewButtonText)
@@ -224,8 +224,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
     }
 
     override fun onMapLongClick(clickPosition: LatLng) {
-        mMap.run {
+        
+        if(resetGame) return
 
+        mMap.run {
             clear()
 
             marker = addMarker(
