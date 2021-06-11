@@ -2,4 +2,18 @@
     <string name="app_name">GeoGuesser</string>
     <string name="title_activity_maps">Map</string>
     <string name="locationRationale">Location is needed to play GeoGuesser</string>
+    <string name="play">Play</string>
+    <string name="initalScore">Give it a try</string>
+    <string name="scoreTitle">You have not played yet… Such a shame.</string>
+    <string name="streetViewButtonText">Guess</string>
+    <string name="mapFabText">Confirm</string>
+    <string name="introTitle1">Welcome, Explorer</string>
+    <string name="descCard1">Set out on a journey that takes you from the smallest town in rural China to the biggest skyscraper in New York City.</string>
+    <string name="introTitle2">Walk around</string>
+    <string name="descCard2">Search for flags, shop signs, landmarks or anything else that might help you in the mighty quest for your location.</string>
+    <string name="introTitle3">Find the right location</string>
+    <string name="descCard3">Beat your high score by being as accurate as possible.</string>
+    <string name="playAgain">Play Again</string>
+    <string name="pointsTextWithValue">Your last best guess was accurate within %1$s km.</string>
+    <string name="titleAfterPlayedGame">Wow, that is really something.</string>
 </resources>
