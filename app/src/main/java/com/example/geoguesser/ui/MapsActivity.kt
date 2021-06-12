@@ -144,6 +144,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     private fun setMapView() {
 
+        this.title = getString(R.string.map_title)
+
         if (!this::mapFragment.isInitialized) {
             mapFragment = SupportMapFragment.newInstance()
             val inflater = TransitionInflater.from(this)
@@ -185,6 +187,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     private fun setStreetView() {
 
+        this.title = getString(R.string.street_view_title)
+
         binding.apply {
             fab.setIconResource(R.drawable.ic_baseline_map_128)
             fab.text = getString(R.string.streetViewButtonText)
@@ -222,6 +226,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
     override fun onMapLongClick(clickPosition: LatLng) {
 
         if(resetGame) return
+
+        soundPoolPlayer.playSound(R.raw.marker)
 
         mMap.run {
             clear()
