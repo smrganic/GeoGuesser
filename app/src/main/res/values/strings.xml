@@ -16,4 +16,6 @@
     <string name="playAgain">Play Again</string>
     <string name="pointsTextWithValue">Your last best guess was accurate within %1$s km.</string>
     <string name="titleAfterPlayedGame">Wow, that is really something.</string>
+    <string name="map_title">Select a location</string>
+    <string name="street_view_title">Look around</string>
 </resources>

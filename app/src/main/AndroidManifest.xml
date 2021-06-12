@@ -18,7 +18,6 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.GeoGuesser">
-        <activity android:name=".ui.tester"></activity>
         <activity android:name=".ui.StartGameActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
