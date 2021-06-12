@@ -1,10 +1,16 @@
 package com.example.geoguesser.ui
 
+import android.content.Context
 import android.graphics.Color
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.view.View
 import android.widget.Toast
 import com.example.geoguesser.R
 import com.example.geoguesser.databinding.ActivityMapsBinding
@@ -37,10 +43,43 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
     private var streetViewIsVisible = true
 
     private lateinit var streetView: SupportStreetViewPanoramaFragment
+    private lateinit var globalPanorama: StreetViewPanorama
+
     private lateinit var mapFragment: SupportMapFragment
     private lateinit var mMap: GoogleMap
+
     private var marker: Marker? = null
     private var resetGame = false
+
+
+    private lateinit var sensorManager: SensorManager;
+    private lateinit var gyroSensor: Sensor
+    private var gyroEnabled: Boolean = true
+
+    private val sensorListener = object : SensorEventListener {
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        override fun onSensorChanged(event: SensorEvent?) {
+            val values = event?.values ?: floatArrayOf(0.0f, 0.0f, 0.0f)
+
+            if (this@MapsActivity::globalPanorama.isInitialized) {
+                val duration: Long = 200
+                val camera = StreetViewPanoramaCamera.Builder()
+                    .zoom(globalPanorama.panoramaCamera.zoom)
+                    .tilt(-normalised(values[1]))
+                    .bearing(values[0])
+                    .build()
+                globalPanorama.animateTo(camera, duration)
+            }
+        }
+
+        private fun normalised(x: Float): Float {
+            val inputMin = -180
+            val inputMax = 180
+            val outputRangeMin = -90
+            val outputRangeMax = 90
+            return ((outputRangeMax - outputRangeMin) * (x - inputMin)) / (inputMax - inputMin) + outputRangeMin
+        }
+    }
 
     companion object {
         const val STREET_VIEW_TAG = "streetViewTag"
@@ -53,14 +92,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
         setContentView(binding.root)
 
         binding.fab.setOnClickListener { onFabClick() }
+        binding.fabDisableGyro.setOnClickListener { onFabToggleGyro() }
 
         setStreetView()
 
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION)
+
+    }
+
+    private fun onFabToggleGyro() {
+        if (gyroEnabled) {
+            sensorManager.unregisterListener(sensorListener)
+            binding.fabDisableGyro.text = getString(R.string.enable_gyro)
+        } else {
+            sensorManager.registerListener(sensorListener, gyroSensor, SensorManager.SENSOR_DELAY_UI)
+            binding.fabDisableGyro.text = getString(R.string.disable_gyro)
+        }
+        gyroEnabled = !gyroEnabled
+    }
+
+    override fun onResume() {
+        super.onResume()
+        sensorManager.registerListener(sensorListener, gyroSensor, SensorManager.SENSOR_DELAY_UI)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(sensorListener)
     }
 
     private fun onFabClick() {
 
-        if(resetGame){
+        if (resetGame) {
             resetGame = false
             streetViewIsVisible = true
             marker = null
@@ -108,7 +172,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
         val formattedResult = String.format("%.2f", results[0] / 1000)
 
-        if(preferences.getHighScore() > results[0]) preferences.setHighScore(results[0])
+        if (preferences.getHighScore() > results[0]) preferences.setHighScore(results[0])
 
         return formattedResult
     }
@@ -132,7 +196,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
         val yValue = (selectedPosition.longitude + actualPosition.longitude) / 2
         val infoWindowPosition = LatLng(xValue, yValue)
 
-        poly.addInfoWindow(mMap, "Distance", "You guessed $result km from the correct location.", infoWindowPosition)
+        poly.addInfoWindow(
+            mMap,
+            "Distance",
+            "You guessed $result km from the correct location.",
+            infoWindowPosition
+        )
 
         val latLngBoundsBuilder = LatLngBounds.builder()
         latLngBoundsBuilder.include(selectedPosition)
@@ -145,6 +214,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
     private fun setMapView() {
 
         this.title = getString(R.string.map_title)
+        binding.fabDisableGyro.visibility = View.GONE
 
         if (!this::mapFragment.isInitialized) {
             mapFragment = SupportMapFragment.newInstance()
@@ -192,6 +262,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
         binding.apply {
             fab.setIconResource(R.drawable.ic_baseline_map_128)
             fab.text = getString(R.string.streetViewButtonText)
+            fabDisableGyro.visibility = View.VISIBLE
         }
 
 
@@ -225,7 +296,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     override fun onMapLongClick(clickPosition: LatLng) {
 
-        if(resetGame) return
+        if (resetGame) return
 
         soundPoolPlayer.playSound(R.raw.marker)
 
@@ -243,6 +314,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLon
 
     override fun onStreetViewPanoramaReady(panorama: StreetViewPanorama) {
         panorama.isStreetNamesEnabled = false
+        globalPanorama = panorama
         setNewLocation(panorama)
     }
 }

@@ -22,6 +22,22 @@
         android:text="@string/streetViewButtonText"
         android:textAlignment="center"
         map:icon="@drawable/ic_baseline_map_128"
+        android:paddingEnd="@dimen/paddingFab"
+        android:paddingStart="@dimen/paddingFab"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabDisableGyro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/mediumMargin"
+        android:layout_marginBottom="@dimen/largeMargin"
+        android:text="@string/disable_gyro"
+        android:textAlignment="center"
+        android:visibility="visible"
+        android:paddingEnd="@dimen/paddingFab"
+        android:paddingStart="@dimen/paddingFab"
+        map:layout_constraintBottom_toBottomOf="parent"
+        map:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
