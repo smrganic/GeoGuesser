@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="largeMargin">64dp</dimen>
+    <dimen name="mediumMargin">32dp</dimen>
+    <dimen name="bottomMarginStartGameText">24dp</dimen>
+    <dimen name="paddingFab">12dp</dimen>
+</resources>
