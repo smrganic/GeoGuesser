@@ -22,6 +22,7 @@ class SoundPoolPlayer(context: Context) : AudioPlayer {
 
     init {
 
+        // Setup defaults
         val audioAttributes = AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_GAME)
@@ -32,13 +33,15 @@ class SoundPoolPlayer(context: Context) : AudioPlayer {
             .setMaxStreams(maxStreams)
             .build()
 
-
+        // Notify when all the sounds have loaded
         soundPool.setOnLoadCompleteListener { _, _, _ -> soundLoaded = true }
 
         soundMap[R.raw.marker] = soundPool.load(context, R.raw.marker, priority)
     }
 
     override fun playSound(id: Int) {
+
+        // Identify the sound and play it, could be used to add more sounds.
         if (soundLoaded)
             when (id) {
                 R.raw.marker -> soundPool.play(
