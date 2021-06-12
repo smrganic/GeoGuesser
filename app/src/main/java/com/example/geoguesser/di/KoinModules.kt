@@ -17,19 +17,25 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val prefsModule = module {
+
     single { Preferences(androidContext()) }
+
     factory { OkHttpClient() }
     single { Networking(get()) }
+
+    // Pass an instance of Random coordinates parser to any parser requests
     single<Parser<String, LatLng>> { RandomCoordinatesParser() }
+
+    // Pass an instance of SoundPool to any AudioPlayer requests
     single<AudioPlayer> { SoundPoolPlayer(androidContext()) }
 }
 
-val mvvmModule = module {
+val modelModule = module {
     factory { LocationData() }
     factory { MapElementsData() }
     factory { GameData() }
 }
 
 val viewModelModule = module {
-    viewModel<LocationViewModel> { LocationViewModel(get(), get(), get()) }
+    viewModel { LocationViewModel(get(), get(), get()) }
 }

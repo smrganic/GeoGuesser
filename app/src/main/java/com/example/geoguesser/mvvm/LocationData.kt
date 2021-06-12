@@ -2,7 +2,6 @@ package com.example.geoguesser.mvvm
 
 import com.google.android.gms.maps.StreetViewPanorama
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 
 class LocationData() {
     private var position: LatLng? = null
@@ -14,6 +13,6 @@ class LocationData() {
     }
 
     fun getPanorama(): StreetViewPanorama? = panorama
-    fun getPosition() : LatLng? = position
+    fun getPosition(): LatLng? = position
 
 }

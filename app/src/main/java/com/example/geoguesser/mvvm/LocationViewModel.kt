@@ -3,32 +3,31 @@ package com.example.geoguesser.mvvm
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.maps.StreetViewPanorama
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 
 class LocationViewModel(
-    private var locationData: LocationData,
-    private var mapElementsData: MapElementsData,
-    private var startGameData: GameData
+    locationData: LocationData,
+    mapElementsData: MapElementsData,
+    startGameData: GameData
 ) : ViewModel() {
-    private val _data = MutableLiveData(locationData)
-    val data: LiveData<LocationData> = _data
 
-    private val _mapData = MutableLiveData(mapElementsData)
-    val mapData: LiveData<MapElementsData> = _mapData
+    private val _locationMutableData = MutableLiveData(locationData)
+    val locationLiveData: LiveData<LocationData> = _locationMutableData
 
-    private val _gameData = MutableLiveData(startGameData)
-    val gameData: LiveData<GameData> = _gameData
     fun setData(locationData: LocationData) {
-        _data.value = locationData
+        _locationMutableData.value = locationData
     }
+
+    private val _mapMutableData = MutableLiveData(mapElementsData)
+    val mapLiveData: LiveData<MapElementsData> = _mapMutableData
 
     fun setMarker(mapElementsData: MapElementsData) {
-        _mapData.value = mapElementsData
+        _mapMutableData.value = mapElementsData
     }
 
+    private val _gameMutableData = MutableLiveData(startGameData)
+    val gameLiveData: LiveData<GameData> = _gameMutableData
+
     fun setGameData(gameData: GameData) {
-        _gameData.value = gameData
+        _gameMutableData.value = gameData
     }
 }

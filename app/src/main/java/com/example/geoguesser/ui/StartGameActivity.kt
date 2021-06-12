@@ -19,7 +19,7 @@ class StartGameActivity : AppCompatActivity() {
         binding = ActivityStartGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.fab.setOnClickListener{
+        binding.fab.setOnClickListener {
 
             intent = Intent(this, MapsActivity::class.java)
             startActivity(intent)
@@ -31,17 +31,25 @@ class StartGameActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
         updateUI()
     }
 
     private fun updateUI() {
-        if (preferences.getHighScore() != Float.MAX_VALUE){
+
+        // Get the current high score form shared preferences
+        if (preferences.getHighScore() != Float.MAX_VALUE) {
+
             val formattedResult = String.format("%.2f", preferences.getHighScore() / 1000)
+
             binding.apply {
                 scoreTitle.text = getString(R.string.titleAfterPlayedGame)
-                points.text = String.format(getString(R.string.pointsTextWithValue), formattedResult)
+                points.text =
+                    String.format(getString(R.string.pointsTextWithValue), formattedResult)
             }
+
         }
+
     }
 
 }

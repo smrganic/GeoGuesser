@@ -8,7 +8,6 @@ import com.example.geoguesser.R
 import com.example.geoguesser.mvvm.LocationViewModel
 import com.example.geoguesser.mvvm.MapElementsData
 import com.example.geoguesser.sounds.AudioPlayer
-import com.example.geoguesser.ui.MapsActivity
 import com.example.geoguesser.utils.Preferences
 import com.example.geoguesser.utils.addInfoWindow
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -37,8 +36,8 @@ class MapFragment : SupportMapFragment(), OnMapReadyCallback, GoogleMap.OnMapLon
 
         getMapAsync(this)
 
-        viewModel.gameData.observe(this, { resetGame = it.getResetGame() })
-        viewModel.mapData.observe(this, { marker = it.getMarker() })
+        viewModel.gameLiveData.observe(this, { resetGame = it.getResetGame() })
+        viewModel.mapLiveData.observe(this, { marker = it.getMarker() })
     }
 
     override fun onMapReady(googleMap: GoogleMap) {

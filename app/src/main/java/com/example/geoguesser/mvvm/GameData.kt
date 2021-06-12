@@ -1,6 +1,6 @@
 package com.example.geoguesser.mvvm
 
-class GameData (
+class GameData(
     private var isStreetViewVisible: Boolean = true,
     private var resetGame: Boolean = false
 ) {

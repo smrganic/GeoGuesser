@@ -3,6 +3,7 @@ package com.example.geoguesser.utils
 import android.content.Context
 
 class Preferences(context: Context) {
+
     private val FILE = "GeoGuesserPreferences"
     private val SETUP_KEY = "SETUP_KEY"
     private val HIGH_SCORE_KEY = "HIGH_SCORE_KEY"

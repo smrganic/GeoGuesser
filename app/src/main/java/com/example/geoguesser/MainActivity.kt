@@ -9,17 +9,24 @@ import com.example.geoguesser.utils.Preferences
 import org.koin.android.ext.android.inject
 
 class MainActivity : AppCompatActivity() {
+
     private val preferences: Preferences by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check if the user has completed setUp and launch the corresponding activity.
         val intent: Intent
         if (preferences.isSetupComplete()) {
+
             intent = Intent(this, StartGameActivity::class.java)
             startActivity(intent)
+
         } else {
+
             intent = Intent(this, GeoAppIntro::class.java)
             startActivity(intent)
+
         }
 
     }

@@ -1,19 +1,14 @@
 package com.example.geoguesser.ui
 
 import android.content.Context
-import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.transition.TransitionInflater
-import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.Observer
+import androidx.appcompat.app.AppCompatActivity
 import com.example.geoguesser.R
 import com.example.geoguesser.databinding.ActivityMapsBinding
 import com.example.geoguesser.fragments.MapFragment
@@ -21,45 +16,44 @@ import com.example.geoguesser.fragments.StreetViewFragment
 import com.example.geoguesser.mvvm.GameData
 import com.example.geoguesser.mvvm.LocationViewModel
 import com.example.geoguesser.mvvm.MapElementsData
-import com.example.geoguesser.network.Networking
-import com.example.geoguesser.network.Parser
 import com.example.geoguesser.sounds.AudioPlayer
-import com.example.geoguesser.utils.Preferences
-import com.example.geoguesser.utils.addInfoWindow
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
-
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Response
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.io.IOException
 
 class MapsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMapsBinding
 
     private var streetViewIsVisible = true
-    private lateinit var streetView: StreetViewFragment
-    private lateinit var mapFragment: MapFragment
+    private var resetGame = false
+
+    private lateinit var streetViewFragment: StreetViewFragment
     private var panorama: StreetViewPanorama? = null
+
+    private lateinit var mapFragment: MapFragment
+    private var marker: Marker? = null
 
     private val soundPoolPlayer: AudioPlayer by inject()
     private val viewModel by viewModel<LocationViewModel>()
+
     private lateinit var sensorManager: SensorManager;
     private lateinit var gyroSensor: Sensor
     private var gyroEnabled: Boolean = true
-    private var resetGame = false
 
-    private var marker: Marker? = null
-
+    // React to sensor value changes here
     private val sensorListener = object : SensorEventListener {
+
+        // Don not need this, don't care about accuracy
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
         override fun onSensorChanged(event: SensorEvent?) {
 
+            // Get values from sensor
             val values = event?.values ?: floatArrayOf(0.0f, 0.0f, 0.0f)
 
+            // Apply camera transformations to panorama only if panorama is not null
             panorama?.let {
                 val duration: Long = 200
                 val camera = StreetViewPanoramaCamera.Builder()
@@ -69,11 +63,9 @@ class MapsActivity : AppCompatActivity() {
                     .build()
                 it.animateTo(camera, duration)
             }
-
-            val test = if (panorama != null) "yea" else "no"
-            Log.d("OBSERVER", test)
         }
 
+        // Adapt the output of the orientation sensor into camera tilt expected degree range
         private fun normalised(x: Float): Float {
             val inputMin = -180
             val inputMax = 180
@@ -96,25 +88,36 @@ class MapsActivity : AppCompatActivity() {
         binding.fab.setOnClickListener { onFabClick() }
         binding.fabDisableGyro.setOnClickListener { onFabToggleGyro() }
 
-        setStreetView()
-
+        // Explore TYPE_ORIENTATION deprecation and replace accordingly
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION)
 
-        viewModel.data.observe(this@MapsActivity, { panorama = it.getPanorama() })
+        // Input Start Game Data into View Model and observe changes
+        viewModel.setGameData(GameData(streetViewIsVisible, resetGame))
 
-        viewModel.mapData.observe(this, { marker = it.getMarker() })
+        viewModel.locationLiveData.observe(this@MapsActivity, { panorama = it.getPanorama() })
 
-        viewModel.gameData.observe(this, {
+        viewModel.mapLiveData.observe(this, { marker = it.getMarker() })
+
+        viewModel.gameLiveData.observe(this, {
             resetGame = it.getResetGame()
             streetViewIsVisible = it.getStreetViewVisibility()
         })
 
-        viewModel.setGameData(GameData(isStreetViewVisible = true, resetGame = false))
-
-        sensorManager.registerListener(sensorListener, gyroSensor, SensorManager.SENSOR_DELAY_UI)
-
+        setStreetView()
     }
+
+    // Added Lifecycle needed to run sensors properly
+    override fun onResume() {
+        super.onResume()
+        sensorManager.registerListener(sensorListener, gyroSensor, SensorManager.SENSOR_DELAY_UI)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(sensorListener)
+    }
+
 
     private fun onFabToggleGyro() {
         if (gyroEnabled) {
@@ -131,18 +134,10 @@ class MapsActivity : AppCompatActivity() {
         gyroEnabled = !gyroEnabled
     }
 
-    override fun onResume() {
-        super.onResume()
-        sensorManager.registerListener(sensorListener, gyroSensor, SensorManager.SENSOR_DELAY_UI)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        sensorManager.unregisterListener(sensorListener)
-    }
-
+    // Look into refactoring this, there has to be a better way
     private fun onFabClick() {
 
+        // Reset the game by updating all observers and showing the street view
         if (resetGame) {
             viewModel.setGameData(GameData(isStreetViewVisible = true, resetGame = false))
             viewModel.setMarker(MapElementsData())
@@ -150,12 +145,13 @@ class MapsActivity : AppCompatActivity() {
             return
         }
 
+        // If a marker exists and the button is pressed that means the user is confirming their guess
+        // Play a sound draw the results on the map and update game state
         if (marker != null) {
 
             soundPoolPlayer.playSound(R.raw.marker)
 
-            mapFragment.drawPolyLine(marker!!.position, viewModel.data.value?.getPosition()!!)
-
+            mapFragment.drawPolyLine(marker!!.position, viewModel.locationLiveData.value?.getPosition()!!)
 
             binding.apply {
                 fab.setIconResource(R.drawable.ic_baseline_explore_24)
@@ -164,11 +160,21 @@ class MapsActivity : AppCompatActivity() {
             }
 
         } else {
+
+            // If there is no marker and street view is visible then inflate the map fragment
+            // notify observers of the state change
             if (streetViewIsVisible) {
+
                 setMapView()
+
                 binding.fab.setIconResource(R.drawable.ic_baseline_pin_drop_128)
                 binding.fab.text = getString(R.string.mapFabText)
+
                 viewModel.setGameData(GameData(isStreetViewVisible = false, resetGame))
+
+                // If there is no marker and no street view that means that user needs to place one
+                // for the game to continue. Notify the user with the relevant information
+                // Could add snack bar or a dialog here for better visuals
             } else {
                 Toast.makeText(this, "Place a marker by long pressing the map", Toast.LENGTH_SHORT)
                     .show()
@@ -186,7 +192,6 @@ class MapsActivity : AppCompatActivity() {
             mapFragment = MapFragment()
         }
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         supportFragmentManager.beginTransaction().setReorderingAllowed(true)
             .replace(R.id.fragmentContainer, mapFragment, MAP_TAG).commit()
     }
@@ -202,18 +207,20 @@ class MapsActivity : AppCompatActivity() {
             fabDisableGyro.visibility = View.VISIBLE
         }
 
+        // If there is no instance of street view fragment create one and add it to the activity
+        // if an instance exists that is because user is starting a new game from map fragment
+        // so street view fragment needs to replace the map view fragment
+        if (!this::streetViewFragment.isInitialized) {
 
-        if (!this::streetView.isInitialized) {
-
-            streetView = StreetViewFragment()
+            streetViewFragment = StreetViewFragment()
 
             supportFragmentManager.beginTransaction().setReorderingAllowed(true)
-                .add(R.id.fragmentContainer, streetView, STREET_VIEW_TAG).commit()
+                .add(R.id.fragmentContainer, streetViewFragment, STREET_VIEW_TAG).commit()
 
         } else {
 
             supportFragmentManager.beginTransaction().setReorderingAllowed(true)
-                .replace(R.id.fragmentContainer, streetView, STREET_VIEW_TAG).commit()
+                .replace(R.id.fragmentContainer, streetViewFragment, STREET_VIEW_TAG).commit()
 
         }
 
