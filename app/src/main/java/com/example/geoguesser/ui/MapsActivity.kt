@@ -18,7 +18,9 @@ import com.example.geoguesser.R
 import com.example.geoguesser.databinding.ActivityMapsBinding
 import com.example.geoguesser.fragments.MapFragment
 import com.example.geoguesser.fragments.StreetViewFragment
+import com.example.geoguesser.mvvm.GameData
 import com.example.geoguesser.mvvm.LocationViewModel
+import com.example.geoguesser.mvvm.MapElementsData
 import com.example.geoguesser.network.Networking
 import com.example.geoguesser.network.Parser
 import com.example.geoguesser.sounds.AudioPlayer
@@ -49,6 +51,8 @@ class MapsActivity : AppCompatActivity() {
     private lateinit var gyroSensor: Sensor
     private var gyroEnabled: Boolean = true
     private var resetGame = false
+
+    private var marker: Marker? = null
 
     private val sensorListener = object : SensorEventListener {
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -97,9 +101,16 @@ class MapsActivity : AppCompatActivity() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION)
 
-        viewModel.data.observe(this@MapsActivity, Observer {
-            panorama = it.getPanorama()
+        viewModel.data.observe(this@MapsActivity, { panorama = it.getPanorama() })
+
+        viewModel.mapData.observe(this, { marker = it.getMarker() })
+
+        viewModel.gameData.observe(this, {
+            resetGame = it.getResetGame()
+            streetViewIsVisible = it.getStreetViewVisibility()
         })
+
+        viewModel.setGameData(GameData(isStreetViewVisible = true, resetGame = false))
 
         sensorManager.registerListener(sensorListener, gyroSensor, SensorManager.SENSOR_DELAY_UI)
 
@@ -133,19 +144,31 @@ class MapsActivity : AppCompatActivity() {
     private fun onFabClick() {
 
         if (resetGame) {
-            resetGame = false
-            streetViewIsVisible = true
-
+            viewModel.setGameData(GameData(isStreetViewVisible = true, resetGame = false))
+            viewModel.setMarker(MapElementsData())
             setStreetView()
             return
+        }
 
+        if (marker != null) {
+
+            soundPoolPlayer.playSound(R.raw.marker)
+
+            mapFragment.drawPolyLine(marker!!.position, viewModel.data.value?.getPosition()!!)
+
+
+            binding.apply {
+                fab.setIconResource(R.drawable.ic_baseline_explore_24)
+                fab.text = getString(R.string.playAgain)
+                viewModel.setGameData(GameData(streetViewIsVisible, resetGame = true))
+            }
 
         } else {
             if (streetViewIsVisible) {
                 setMapView()
                 binding.fab.setIconResource(R.drawable.ic_baseline_pin_drop_128)
                 binding.fab.text = getString(R.string.mapFabText)
-                streetViewIsVisible = false
+                viewModel.setGameData(GameData(isStreetViewVisible = false, resetGame))
             } else {
                 Toast.makeText(this, "Place a marker by long pressing the map", Toast.LENGTH_SHORT)
                     .show()

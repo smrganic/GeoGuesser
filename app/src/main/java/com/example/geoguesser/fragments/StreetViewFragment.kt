@@ -25,7 +25,7 @@ class StreetViewFragment : SupportStreetViewPanoramaFragment(), OnStreetViewPano
 
     private val networking: Networking by inject()
     private val parser by inject<Parser<String, LatLng>>()
-    private val preferences: Preferences by inject()
+
     private val viewModel by sharedViewModel<LocationViewModel>()
     private lateinit var position: LatLng
 
@@ -72,54 +72,4 @@ class StreetViewFragment : SupportStreetViewPanoramaFragment(), OnStreetViewPano
 
     }
 
-    private fun calculateResult(selectedPosition: LatLng, actualPosition: LatLng): String {
-        val results = FloatArray(3)
-        Location.distanceBetween(
-            selectedPosition.latitude,
-            selectedPosition.longitude,
-            actualPosition.latitude,
-            actualPosition.longitude,
-            results
-        )
-
-        val formattedResult = String.format("%.2f", results[0] / 1000)
-
-        if (preferences.getHighScore() > results[0]) preferences.setHighScore(results[0])
-
-        return formattedResult
-    }
-
-    fun drawPolyLine(selectedPosition: LatLng, mMap: GoogleMap) {
-        val poly = mMap.addPolyline(
-            PolylineOptions().clickable(false).add(selectedPosition).add(position)
-        )
-        poly.width = 12f
-        poly.color = Color.DKGRAY
-        poly.pattern = listOf(Dot(), Gap(20f))
-
-        mMap.addMarker(
-            MarkerOptions().position(position).title("Street view Location")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-        )
-
-        val result = calculateResult(selectedPosition, position)
-
-        val xValue = (selectedPosition.latitude + position.latitude) / 2
-        val yValue = (selectedPosition.longitude + position.longitude) / 2
-        val infoWindowPosition = LatLng(xValue, yValue)
-
-        poly.addInfoWindow(
-            mMap,
-            "Distance",
-            "You guessed $result km from the correct location.",
-            infoWindowPosition
-        )
-
-        val latLngBoundsBuilder = LatLngBounds.builder()
-        latLngBoundsBuilder.include(selectedPosition)
-        latLngBoundsBuilder.include(position)
-        val bounds = latLngBoundsBuilder.build()
-
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200))
-    }
 }
