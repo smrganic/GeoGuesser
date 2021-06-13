@@ -93,7 +93,7 @@ class MapsActivity : AppCompatActivity() {
         gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION)
 
         // Input Start Game Data into View Model and observe changes
-        viewModel.setGameData(GameData(streetViewIsVisible, resetGame))
+        viewModel.setGameData(GameData(streetViewIsVisible, resetGame, gyroEnabled))
 
         viewModel.locationLiveData.observe(this@MapsActivity, { panorama = it.getPanorama() })
 
@@ -102,6 +102,7 @@ class MapsActivity : AppCompatActivity() {
         viewModel.gameLiveData.observe(this, {
             resetGame = it.getResetGame()
             streetViewIsVisible = it.getStreetViewVisibility()
+            gyroEnabled = it.getGyroStatus()
         })
 
         setStreetView()
@@ -110,12 +111,16 @@ class MapsActivity : AppCompatActivity() {
     // Added Lifecycle needed to run sensors properly
     override fun onResume() {
         super.onResume()
-        sensorManager.registerListener(sensorListener, gyroSensor, SensorManager.SENSOR_DELAY_UI)
+        if(gyroEnabled){
+            sensorManager.registerListener(sensorListener, gyroSensor, SensorManager.SENSOR_DELAY_UI)
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(sensorListener)
+        if(gyroEnabled){
+            sensorManager.unregisterListener(sensorListener)
+        }
     }
 
 
@@ -131,7 +136,7 @@ class MapsActivity : AppCompatActivity() {
             )
             binding.fabDisableGyro.text = getString(R.string.disable_gyro)
         }
-        gyroEnabled = !gyroEnabled
+        viewModel.setGameData(GameData(streetViewIsVisible, resetGame, !gyroEnabled))
     }
 
     // Look into refactoring this, there has to be a better way
@@ -139,7 +144,7 @@ class MapsActivity : AppCompatActivity() {
 
         // Reset the game by updating all observers and showing the street view
         if (resetGame) {
-            viewModel.setGameData(GameData(isStreetViewVisible = true, resetGame = false))
+            viewModel.setGameData(GameData(isStreetViewVisible = true, resetGame = false, gyroEnabled))
             viewModel.setMarker(MapElementsData())
             setStreetView()
             return
@@ -156,7 +161,7 @@ class MapsActivity : AppCompatActivity() {
             binding.apply {
                 fab.setIconResource(R.drawable.ic_baseline_explore_24)
                 fab.text = getString(R.string.playAgain)
-                viewModel.setGameData(GameData(streetViewIsVisible, resetGame = true))
+                viewModel.setGameData(GameData(streetViewIsVisible, resetGame = true, gyroEnabled))
             }
 
         } else {
@@ -170,7 +175,7 @@ class MapsActivity : AppCompatActivity() {
                 binding.fab.setIconResource(R.drawable.ic_baseline_pin_drop_128)
                 binding.fab.text = getString(R.string.mapFabText)
 
-                viewModel.setGameData(GameData(isStreetViewVisible = false, resetGame))
+                viewModel.setGameData(GameData(isStreetViewVisible = false, resetGame, gyroEnabled))
 
                 // If there is no marker and no street view that means that user needs to place one
                 // for the game to continue. Notify the user with the relevant information
